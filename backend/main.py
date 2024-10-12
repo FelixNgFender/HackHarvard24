@@ -139,11 +139,16 @@ def get_most_relevant_court_case_opinions(
         for i, opinion in enumerate(result["opinions"]):
             opinion[0] = None if opinion[0] == "" else opinion[0]
             opinion[1] = int(opinion[1])
-        result["opinions"] = {
-            "download_url": opinion[0],
-            "id": opinion[1],
-            "snippet": opinion[2],
-            "type": opinion[3],
-        }
+
+        new_opinions = [
+            {
+                "download_url": opinion[0],
+                "id": opinion[1],
+                "snippet": opinion[2],
+                "type": opinion[3],
+            }
+            for opinion in result["opinions"]
+        ]
+        result["opinions"] = new_opinions
 
     return results
