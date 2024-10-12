@@ -1,0 +1,8 @@
+ipykernel
+ipywidgets
+transformers
+torch
+huggingface_hub[cli]
+sentence-transformers
+lancedb
+pandas
