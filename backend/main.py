@@ -103,6 +103,9 @@ def get_most_relevant_court_case_opinions(
         data = response.json()
         cases_fetched += len(data["results"])
 
+        if data["count"] == 0:
+            return []
+
         # print("cases fetched: ", cases_fetched)
         # print("rows: ", tbl.count_rows())
         # print("HEEY: ", data["results"][0]["opinions"][0]["download_url"])
