@@ -11,12 +11,11 @@ const NavBar = () => {
         <Navbar.Brand></Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
-          {/* Center the Nav Links using justify-content-center */}
-          <Nav className="justify-content-center w-100">
-            <Nav.Link as={Link} to="/Step1">
+          <Nav className="me-auto">
+            <Nav.Link as={Link} to="/step1">
               Step1
             </Nav.Link>
-            <Nav.Link as={Link} to="/Step2">
+            <Nav.Link as={Link} to="/step2">
               Step2
             </Nav.Link>
           </Nav>
