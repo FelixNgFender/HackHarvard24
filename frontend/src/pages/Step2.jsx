@@ -77,7 +77,7 @@ function App() {
   return (
     <div className="min-h-screen flex">
       {/* Left Pane - Black displaying PDF */}
-      <div className="w-1/2 bg-black p-4 pb-16">
+      <div className="w-1/2 bg-black p-4">
         <div className="h-full flex items-center justify-center">
           {selectedPdf ? (
             <iframe
@@ -101,7 +101,7 @@ function App() {
       </div>
 
       {/* Right Pane - Gray with Accordion */}
-      <div className="w-1/2 bg-gray-200 p-4 pb-16">
+      <div className="w-1/2 bg-gray-200 p-4">
         <h2 className="text-lg mb-4">
           Based on your prompt, these are the most relevant cases:
         </h2>
