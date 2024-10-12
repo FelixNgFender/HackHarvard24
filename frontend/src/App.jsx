@@ -1,94 +1,122 @@
 import { useState } from "react";
-import axios from "axios";
-import "./App.css";
+import case1PDF from "./assets/pdfs/case1.PDF";
+import case2PDF from "./assets/pdfs/case2.PDF";
+import case3PDF from "./assets/pdfs/case3.PDF";
+
+// Accordion Item component
+function AccordionItem({ title, content, isOpen, onToggle, score }) {
+  return (
+    <div className="border border-gray-300 rounded mb-2">
+      <div
+        className="cursor-pointer bg-gray-300 p-2 flex justify-between items-center"
+        onClick={onToggle}
+      >
+        <span>{title}</span>
+        <div className="mt-2">
+          {/* Similarity Score */}
+          <div className="flex justify-between items-center">
+            <span>Similarity Score: {score}%</span>
+          </div>
+          {/* Progress Bar */}
+          <div className="w-full bg-gray-300 rounded-full h-2.5 mt-1">
+            <div
+              className="bg-blue-600 h-2.5 rounded-full"
+              style={{ width: `${score}%` }}
+            ></div>
+          </div>
+        </div>
+        <span>{isOpen ? "-" : "+"}</span>
+      </div>
+      {isOpen && (
+        <div className="p-2 bg-gray-100">
+          <p>{content}</p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function App() {
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: "Hi! How can I assist you today?" },
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [openItem, setOpenItem] = useState(null);
+  const [selectedPdf, setSelectedPdf] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (input.trim() === "") return;
+  const accordionItems = [
+    {
+      id: 1,
+      title: "PDF 1: Case 1",
+      content: "View Case 1 PDF",
+      pdfUrl: case1PDF,
+      score: 90,
+    },
+    {
+      id: 2,
+      title: "PDF 2: Case 2",
+      content: "View Case 2 PDF",
+      pdfUrl: case2PDF,
+      score: 80,
+    },
+    {
+      id: 3,
+      title: "PDF 3: Case 3",
+      content: "View Case 3 PDF",
+      pdfUrl: case3PDF,
+      score: 70,
+    },
+  ];
 
-    const newMessages = [...messages, { role: "user", content: input }];
-    setMessages(newMessages);
-    setInput("");
-    setLoading(true);
-
-    try {
-      const response = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-3.5-turbo", // or 'gpt-4'
-          messages: newMessages.map((msg) => ({
-            role: msg.role,
-            content: msg.content,
-          })),
-        },
-        {
-          headers: {
-            Authorization: `Bearer YOUR_OPENAI_API_KEY`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const assistantResponse = response.data.choices[0].message.content;
-      setMessages([
-        ...newMessages,
-        { role: "assistant", content: assistantResponse },
-      ]);
-    } catch (error) {
-      console.error("Error:", error);
-      setMessages([
-        ...newMessages,
-        { role: "assistant", content: "Error: Unable to fetch a response." },
-      ]);
+  const toggleAccordion = (id, pdfUrl) => {
+    if (openItem === id) {
+      setOpenItem(null); // Close the item if it's already open
+      setSelectedPdf(null); // Reset the selected PDF
+    } else {
+      setOpenItem(id); // Open the clicked item
+      setSelectedPdf(pdfUrl); // Set the corresponding PDF
     }
-    setLoading(false);
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-4 bg-white rounded-lg shadow-md">
-        <div className="mb-4 space-y-2 overflow-auto h-96">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`p-3 rounded-md ${
-                message.role === "user"
-                  ? "bg-blue-100 text-right"
-                  : "bg-gray-200 text-left"
-              }`}
+    <div className="min-h-screen flex">
+      {/* Left Pane - Black displaying PDF */}
+      <div className="w-1/2 bg-black p-4">
+        <div className="h-full flex items-center justify-center">
+          {selectedPdf ? (
+            <iframe
+              src={selectedPdf}
+              width="100%"
+              height="100%"
+              className="border-2 border-white"
+              title="PDF Viewer"
             >
-              <p>{message.content}</p>
-            </div>
-          ))}
-          {loading && (
-            <div className="p-3 bg-gray-200 rounded-md">Typing...</div>
+              <p>
+                Your browser does not support PDFs.{" "}
+                <a href={selectedPdf}>Download the PDF</a>.
+              </p>
+            </iframe>
+          ) : (
+            <p className="text-white">
+              Select a case from the right to view the PDF.
+            </p>
           )}
         </div>
+      </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex items-center mt-4 space-x-2"
-        >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
-            className="flex-grow p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="submit"
-            className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Send
-          </button>
-        </form>
+      {/* Right Pane - Gray with Accordion */}
+      <div className="w-1/2 bg-gray-200 p-4">
+        <div className="h-full flex flex-col">
+          <h2 className="text-lg mb-4">Accordion List</h2>
+          <div className="space-y-2">
+            {accordionItems.map((item) => (
+              <AccordionItem
+                key={item.id}
+                title={item.title}
+                content={item.content}
+                isOpen={openItem === item.id}
+                onToggle={() => toggleAccordion(item.id, item.pdfUrl)}
+                score={item.score}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

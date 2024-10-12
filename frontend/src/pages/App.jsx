@@ -94,4 +94,4 @@ function App() {
   );
 }
 
-export default Step1;
+export default App;
