@@ -6,3 +6,5 @@ huggingface_hub[cli]
 sentence-transformers
 lancedb
 pandas
+python-dotenv
+fastapi[standard]
