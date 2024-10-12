@@ -1,8 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
-import "./App.css";
 
-function App() {
+function Step1() {
   const [messages, setMessages] = useState([
     { role: "assistant", content: "Hi! How can I assist you today?" },
   ]);

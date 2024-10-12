@@ -1,7 +1,7 @@
 import { useState } from "react";
-import case1PDF from "./assets/pdfs/case1.pdf";
-import case2PDF from "./assets/pdfs/case2.pdf";
-import case3PDF from "./assets/pdfs/case3.pdf";
+import case1PDF from "../assets/pdfs/case1.pdf";
+import case2PDF from "../assets/pdfs/case2.pdf";
+import case3PDF from "../assets/pdfs/case3.pdf";
 
 // Accordion Item component
 function AccordionItem({ title, content, isOpen, onToggle, score }) {
@@ -36,7 +36,7 @@ function AccordionItem({ title, content, isOpen, onToggle, score }) {
   );
 }
 
-function App() {
+function Step2() {
   const [openItem, setOpenItem] = useState(null);
   const [selectedPdf, setSelectedPdf] = useState(null);
 
@@ -137,4 +137,4 @@ function App() {
   );
 }
 
-export default App;
+export default Step2;
