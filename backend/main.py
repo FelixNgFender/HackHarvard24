@@ -15,7 +15,7 @@ import json
 DB_URI = "data/lancedb"
 COURT_CASE_OPINIONS_TABLE_NAME = "court_case_opinions"
 CASES_TO_FETCH = 50
-CASES_TO_DISPLAY = 25
+CASES_TO_DISPLAY = 5
 
 load_dotenv()
 cl_api_key = os.getenv("COURT_LISTENER_API_KEY")
@@ -26,7 +26,6 @@ embedding_model = (
     .get("sentence-transformers")
     .create(name="all-MiniLM-L6-v2", device=str(device))
 )
-
 
 # Set up LanceDB schema with Embedding API for automatic vectorization at ingestion and query time!
 # Each schema can have multiple source and vector fields
@@ -150,5 +149,4 @@ def get_most_relevant_court_case_opinions(
             for opinion in result["opinions"]
         ]
         result["opinions"] = new_opinions
-
     return results
