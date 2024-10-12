@@ -8,9 +8,15 @@ function Step1() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const [file, setFile] = useState(null);
+  const [showInstructions, setShowInstructions] = useState(true); // State to control visibility
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]); // Store the selected file
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (input.trim() === "") return;
+    if (input.trim() === "" && !file) return;
 
     const newMessages = [...messages, { role: "user", content: input }];
     setMessages(newMessages);
@@ -18,6 +24,10 @@ function Step1() {
     setLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("file", file); // Append the file to the FormData
+      formData.append("message", input); // Include the text message if needed
+
       const response = await axios.post(
         "https://api.openai.com/v1/chat/completions",
         {
@@ -39,6 +49,7 @@ function Step1() {
         ...newMessages,
         { role: "assistant", content: assistantResponse },
       ]);
+      setFile(null);
     } catch (error) {
       console.error("Error:", error);
       setMessages([
@@ -47,6 +58,10 @@ function Step1() {
       ]);
     }
     setLoading(false);
+  };
+
+  const toggleInstructions = () => {
+    setShowInstructions((prev) => !prev);
   };
 
   return (
@@ -91,6 +106,7 @@ function Step1() {
       </div>
 
       {/* Main Chat Section */}
+      
       <div className="flex-grow flex flex-col items-center justify-center">
         <h1 className="text-2xl text-blue-950 font-bold text-center mb-4">
           Welcome to{" "}
@@ -98,8 +114,38 @@ function Step1() {
             cite<span className="font-bold">wise</span>
           </span>
         </h1>
-        <div className="w-full max-w-md p-4 px-4 mx-2 bg-white rounded-lg shadow-md">
-          <div className="mb-4 space-y-2 overflow-auto h-96">
+         
+        {/* instruction */}
+        <div className="w-3/4 p-4 p-4 mx-2 bg-white rounded-lg shadow-lg">
+        <button
+          onClick={toggleInstructions}
+          className="mb-2 text-blue-500 hover:underline focus:outline-none"
+        >
+          {showInstructions ? "Hide Instructions" : "Show Instructions"}
+        </button>
+        
+        {showInstructions && (
+          <p className="mb-2 text-gray-900 text-base text-center font-bold">
+            Get case recommendations tailored to your client’s situation. To do so: 
+          <p className="mb-2 text-gray-600 text-sm text-center font-normal">
+            - Upload meeting notes directly if you have them saved.
+          <p className="mb-2 text-gray-600 text-sm text-center">
+            - Or describe your client’s facts in the chat box — type key details, issues, or case background.
+          <p className="mb-5 text-gray-900 text-base text-center font-bold">
+            Once submitted, we’ll analyze the input and scan millions of cases across various jurisdictions to show relevant cases ranked by similarity.
+          </p>
+          </p>
+          </p>
+          </p>
+        )}
+        </div>
+
+        <div className="h-8 bg-gray-200"></div> 
+
+        {/* chat */}
+
+        <div className="w-3/4 p-4 px-4 mx-2 bg-white rounded-lg shadow-lg">
+          <div className="mb-4 space-y-2 overflow-auto h-64">
             {messages.map((message, index) => (
               <div
                 key={index}
@@ -122,6 +168,11 @@ function Step1() {
             className="flex items-center mt-4 space-x-2"
           >
             <input
+            type="file"
+            onChange={handleFileChange}
+            className=" border rounded-md"
+            />
+            <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -138,6 +189,8 @@ function Step1() {
         </div>
       </div>
     </div>
+    
+    
   );
 }
 
