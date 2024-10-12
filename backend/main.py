@@ -1,21 +1,27 @@
 from contextlib import asynccontextmanager
-import logging
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import lancedb
 import torch
 from lancedb.embeddings import get_registry
 from lancedb.pydantic import LanceModel, Vector
-from collections import namedtuple
 import os
 from dotenv import load_dotenv
 import requests
-import json
 
 
 DB_URI = "data/lancedb"
 COURT_CASE_OPINIONS_TABLE_NAME = "court_case_opinions"
 CASES_TO_FETCH = 50
 CASES_TO_DISPLAY = 5
+ORIGINS = [
+    "http://localhost",
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "https://hackharvard24.pages.dev/",
+]
 
 load_dotenv()
 cl_api_key = os.getenv("COURT_LISTENER_API_KEY")
@@ -26,6 +32,7 @@ embedding_model = (
     .get("sentence-transformers")
     .create(name="all-MiniLM-L6-v2", device=str(device))
 )
+
 
 # Set up LanceDB schema with Embedding API for automatic vectorization at ingestion and query time!
 # Each schema can have multiple source and vector fields
@@ -63,6 +70,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ORIGINS,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
+)
 
 
 @app.get("/opinions/most-relevant")
