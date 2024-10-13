@@ -184,11 +184,11 @@ def generate_revelant_summary(opinion_download_url: str, query: str):
                 "content": [
                     {
                         "type": "text",
-                        "text": f"Understand this following court case opinion: {opinion_download_url}. Then generate a title for this opinion that is relevant to the query: {query}",
+                        "text": f'Understand this following court case opinion: {opinion_download_url}. Then generate a title for this opinion that is relevant to the query: {query}. Don\'t include the beginning "Title: "',
                     }
                 ],
             }
         ],
         max_tokens=30,
     )
-    return response.choices[0]
+    return response.choices[0].message.content
