@@ -58,6 +58,10 @@ function Step1({ setResults }) {
     }
   };
 
+  const toggleInstructions = () => {
+    setShowInstructions((prev) => !prev); // Toggle the instructions visibility
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Left Sidebar */}
@@ -110,6 +114,13 @@ function Step1({ setResults }) {
 
         {/* Instructions */}
         <div className="w-3/4 p-4 mx-2 bg-white rounded-lg shadow-lg">
+          <button
+            onClick={toggleInstructions}
+            className="mb-2 text-blue-500 hover:underline focus:outline-none"
+          >
+            {showInstructions ? "Hide Instructions" : "Show Instructions"}
+          </button>
+
           {showInstructions && (
             <div>
               <p className="mt-5 mb-2 mx-2 text-gray-900 text-base text-center font-bold">
