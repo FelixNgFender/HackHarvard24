@@ -30,14 +30,14 @@ const NavBar = () => {
           <Nav.Link
             as={Link}
             to="/Step1"
-            className="bg-gray-500 hover:bg-purple-900 text-sm text-white font-bold w-16 h-16 rounded-full flex items-center justify-center transition duration-300"
+            className="bg-gray-500 hover:bg-blue-900 text-sm text-white font-bold w-16 h-16 rounded-full flex items-center justify-center transition duration-300"
           >
             Search
           </Nav.Link>
           <Nav.Link
             as={Link}
             to="/Step2"
-            className="bg-gray-500 hover:bg-purple-900 text-sm text-white font-bold w-16 h-16 rounded-full flex items-center justify-center transition duration-300"
+            className="bg-gray-500 hover:bg-blue-900 text-sm text-white font-bold w-16 h-16 rounded-full flex items-center justify-center transition duration-300"
           >
             Analyze
           </Nav.Link>
