@@ -13,7 +13,7 @@ import requests
 DB_URI = "data/lancedb"
 COURT_CASE_OPINIONS_TABLE_NAME = "court_case_opinions"
 CASES_TO_FETCH = 50
-CASES_TO_DISPLAY = 5
+CASES_TO_DISPLAY = 25
 ORIGINS = [
     "http://localhost",
     "http://localhost:3000",
