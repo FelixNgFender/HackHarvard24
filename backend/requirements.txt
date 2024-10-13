@@ -8,3 +8,4 @@ lancedb
 pandas
 python-dotenv
 fastapi[standard]
+openai

@@ -8,6 +8,7 @@ from lancedb.pydantic import LanceModel, Vector
 import os
 from dotenv import load_dotenv
 import requests
+from openai import OpenAI
 
 
 DB_URI = "data/lancedb"
@@ -22,9 +23,11 @@ ORIGINS = [
     "http://localhost:4173",
     "https://hackharvard24.pages.dev/",
 ]
+CHATGPT_MODEL = "gpt-4o-mini"
 
 load_dotenv()
 cl_api_key = os.getenv("COURT_LISTENER_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 db = lancedb.connect("data/lancedb")
 embedding_model = (
@@ -32,6 +35,7 @@ embedding_model = (
     .get("sentence-transformers")
     .create(name="all-MiniLM-L6-v2", device=str(device))
 )
+openai_client = OpenAI(api_key=openai_api_key)
 
 
 # Set up LanceDB schema with Embedding API for automatic vectorization at ingestion and query time!
@@ -168,3 +172,23 @@ def get_most_relevant_court_case_opinions(
         ]
         result["opinions"] = new_opinions
     return results
+
+
+@app.post("/summarize-opinion")
+def generate_revelant_summary(opinion_download_url: str, query: str):
+    response = openai_client.chat.completions.create(
+        model=CHATGPT_MODEL,
+        messages=[
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"Understand this following court case opinion: {opinion_download_url}. Then generate a title for this opinion that is relevant to the query: {query}",
+                    }
+                ],
+            }
+        ],
+        max_tokens=30,
+    )
+    return response.choices[0]
