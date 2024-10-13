@@ -5,6 +5,8 @@ import Step1 from "./pages/Step1"; // Import Step1 component
 import Step2 from "./pages/Step2"; // Import Step2 component
 import NavBar from "./components/NavBar"; // Import NavBar component
 
+import PopupNote from "./components/Notes"; 
+
 const App = () => {
   const [results, setResults] = useState([]); // State to hold results
 
@@ -22,6 +24,8 @@ const App = () => {
           <Route path="/step2" element={<Step2 results={results} />} />
         </Routes>
       </Container>
+
+      <PopupNote />
     </>
   );
 };
