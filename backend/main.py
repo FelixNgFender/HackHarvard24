@@ -14,7 +14,7 @@ from openai import OpenAI
 DB_URI = "data/lancedb"
 COURT_CASE_OPINIONS_TABLE_NAME = "court_case_opinions"
 IDEAL_CASES_TO_FETCH = 50
-CASES_TO_DISPLAY = 25
+CASES_TO_DISPLAY = 5
 ORIGINS = [
     "http://localhost",
     "http://localhost:3000",
@@ -147,26 +147,23 @@ def get_most_relevant_court_case_opinions(
     highlight = "on"
     print(basicized_query)
     url = f"https://www.courtlistener.com/api/rest/v4/search/?q={basicized_query}&type={type}&order_by={order_by}&stat_Precedential={stat_Precedential}&highlight={highlight}"
-    # print(url)
+    print(url)
     headers = {"Authorization": f"Token {cl_api_key}"}
 
     cases_fetched = 0
-    cases_to_fetch = IDEAL_CASES_TO_FETCH
 
-    while url and cases_fetched < cases_to_fetch:
+    while url is not None and cases_fetched < IDEAL_CASES_TO_FETCH:
         response = requests.get(url, headers=headers)
         data = response.json()
-        # print(data)
+        print(data)
 
         if data["count"] == 0 or not data.get("results"):
             return []
 
-        cases_to_fetch = min(IDEAL_CASES_TO_FETCH - cases_fetched, data["count"])
-
         cases_fetched += len(data["results"])
 
-        # print("cases fetched: ", cases_fetched)
-        # print("rows: ", tbl.count_rows())
+        print("cases fetched: ", cases_fetched)
+        print("rows: ", tbl.count_rows())
         # print("HEEY: ", data["results"][0]["opinions"][0]["download_url"])
         # print(type(data["results"][0]["opinions"][0]["download_url"]))
 
@@ -192,14 +189,7 @@ def get_most_relevant_court_case_opinions(
                         (
                             opinion["download_url"] if opinion["download_url"] else "",
                             str(opinion["id"]),
-                            # opinion["snippet"],
-                            generate_revelant_summary(
-                                opinion["download_url"],
-                                query,
-                                opinion["snippet"],
-                            )
-                            if opinion["download_url"]
-                            else "",
+                            opinion["snippet"],
                             opinion["type"],
                         )
                         for opinion in result["opinions"]
@@ -210,9 +200,11 @@ def get_most_relevant_court_case_opinions(
             ],
             on_bad_vectors="drop",
         )
+        print("rows: ", tbl.count_rows())
 
         # Update the URL to the next page
         url = data["next"]
+        print("next url: ", url)
 
     # similarized_opinion = (
     #     openai_client.beta.chat.completions.parse(
@@ -238,6 +230,7 @@ def get_most_relevant_court_case_opinions(
     # if similarized_opinion is None:
     #     similarized_opinion = basicized_query
 
+    print("STUCK HERE")
     results = (
         tbl.search(basicized_query, vector_column_name)
         .limit(CASES_TO_DISPLAY)
@@ -254,7 +247,7 @@ def get_most_relevant_court_case_opinions(
             {
                 "download_url": opinion[0],
                 "id": opinion[1],
-                "snippet": opinion[2],
+                "snippet": generate_revelant_summary(opinion[0], query, opinion[2]),
                 "type": opinion[3],
             }
             for opinion in result["opinions"]
