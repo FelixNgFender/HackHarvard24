@@ -62,6 +62,10 @@ function Step1({ setResults }) {
     setShowInstructions((prev) => !prev); // Toggle the instructions visibility
   };
 
+  const navigateToNotes = () => {
+    navigate("/archived-notes"); // Adjust this path as needed
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Left Sidebar */}
@@ -74,8 +78,9 @@ function Step1({ setResults }) {
           <button className="text-left w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-md">
             New Query
           </button>
-          <button className="text-left w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-md">
-            My Workspace
+          <button className="text-left w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-md"
+          onClick={navigateToNotes}>
+            My Notes
           </button>
           <button className="text-left w-full py-2 px-4 bg-gray-800 hover:bg-gray-700 rounded-md">
             Home

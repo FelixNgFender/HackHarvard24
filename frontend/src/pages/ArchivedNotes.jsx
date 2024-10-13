@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Edit, Save, X } from 'lucide-react';
 
 const ArchivedNotesPage = () => {
   const [notes, setNotes] = useState([]);
@@ -37,6 +36,7 @@ const ArchivedNotesPage = () => {
   };
 
   return (
+    
     <div className="min-h-screen bg-gray-100">
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -73,14 +73,12 @@ const ArchivedNotesPage = () => {
                           onClick={() => handleSave(note.id)}
                           className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                         >
-                          <Save size={16} className="mr-2" />
                           Save
                         </button>
                         <button
                           onClick={handleCancel}
                           className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         >
-                          <X size={16} className="mr-2" />
                           Cancel
                         </button>
                       </>
@@ -90,14 +88,12 @@ const ArchivedNotesPage = () => {
                           onClick={() => handleEdit(note)}
                           className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                          <Edit size={16} className="mr-2" />
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(note.id)}
                           className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                         >
-                          <Trash2 size={16} className="mr-2" />
                           Delete
                         </button>
                       </>
