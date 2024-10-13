@@ -4,8 +4,8 @@ import { Route, Routes } from "react-router-dom";
 import Step1 from "./pages/Step1"; // Import Step1 component
 import Step2 from "./pages/Step2"; // Import Step2 component
 import NavBar from "./components/NavBar"; // Import NavBar component
-
 import PopupNote from "./components/Notes"; 
+import ArchivedNotes from "./pages/ArchivedNotes";
 
 const App = () => {
   const [results, setResults] = useState([]); // State to hold results
@@ -22,6 +22,7 @@ const App = () => {
           <Route path="/" element={<Step1 setResults={setResults} />} />
           <Route path="/step1" element={<Step1 setResults={setResults} />} />
           <Route path="/step2" element={<Step2 results={results} />} />
+          <Route path="/archived-notes" element={<ArchivedNotes results={results} />} />
         </Routes>
       </Container>
 
