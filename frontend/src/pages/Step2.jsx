@@ -17,7 +17,7 @@ function AccordionItem({
   return (
     <div className="border border-gray-300 rounded mb-2">
       <div
-        className="cursor-pointer bg-gray-300 px-8 py-2 flex justify-between items-center"
+        className="cursor-pointer bg-gray-300 p-2 flex justify-between items-center"
         onClick={onToggle}
       >
         {/* Render the preprocessed title and make it clickable */}
@@ -25,13 +25,13 @@ function AccordionItem({
           href={absoluteUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-bold text-blue-900 hover:underline"
+          className="font-bold text-blue-600 hover:underline"
           dangerouslySetInnerHTML={renderPreprocessedText(title)}
         ></a>
 
         <div className="mt-2">
           {/* Similarity Score */}
-          <div className="flex justify-between items-center text-blue-950">
+          <div className="flex justify-between items-center text-blue-900">
             <span>Similarity Score: {score.toFixed(2)}%</span>
           </div>
           {/* Progress Bar */}
@@ -42,6 +42,7 @@ function AccordionItem({
             ></div>
           </div>
         </div>
+        <span>{isOpen ? "-" : "+"}</span>
       </div>
       {isOpen && (
         <div className="p-2 bg-gray-100">
@@ -84,8 +85,8 @@ function Step2({ results }) {
   return (
     <div className="min-h-screen flex">
       {/* Left Pane - Black displaying PDF */}
-      <div className="w-1/2 bg-gray-200 p-4">
-        <div className="h-full flex items-center justify-center pb-20">
+      <div className="w-1/2 bg-black p-4">
+        <div className="h-full flex items-center justify-center">
           {selectedPdf ? (
             <iframe
               src={selectedPdf}
@@ -100,7 +101,7 @@ function Step2({ results }) {
               </p>
             </iframe>
           ) : (
-            <p className="text-blue-950">
+            <p className="text-white">
               Select a case from the right to view the PDF.
             </p>
           )}
