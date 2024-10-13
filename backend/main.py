@@ -13,7 +13,7 @@ from openai import OpenAI
 
 DB_URI = "data/lancedb"
 COURT_CASE_OPINIONS_TABLE_NAME = "court_case_opinions"
-CASES_TO_FETCH = 50
+IDEAL_CASES_TO_FETCH = 50
 CASES_TO_DISPLAY = 25
 ORIGINS = [
     "http://localhost",
@@ -58,6 +58,11 @@ class Embedding(LanceModel):
     syllabus: str = embedding_model.SourceField()
 
 
+# class EmbeddingColumns(BaseModel):
+#     opinions: List[Tuple[str, str, str, str]]
+#     syllabus: str
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Run on startup
@@ -84,11 +89,54 @@ app.add_middleware(
 )
 
 
+def generate_revelant_summary(opinion_download_url: str, query: str, snippet: str):
+    response = (
+        openai_client.chat.completions.create(
+            model=CHATGPT_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": f'Understand this following court case opinion: {opinion_download_url}. Then generate a title for this opinion that is relevant to the query: {query}, and snippet from the linked opinion: {snippet}. <mark></mark> elements are words highlighted from the search query. Don\'t include the beginning "Title: "',
+                        }
+                    ],
+                }
+            ],
+            max_tokens=30,
+        )
+        .choices[0]
+        .message.content
+    )
+    return response or ""
+
+
 @app.get("/opinions/most-relevant")
 def get_most_relevant_court_case_opinions(
     query: str,
     vector_column_name: str | None = None,
 ):
+    basicized_query = (
+        openai_client.chat.completions.create(
+            model=CHATGPT_MODEL,
+            messages=[
+                {
+                    "role": "system",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": f"You are a legal researcher looking for the most relevant court case opinions to your query: {query}.You are also using CourtListener search engine that allows you to search for court case opinions across hundreds of jurisdictions. The only limitation is that it is a very basic search engine. Skim your human query down to yield the most relevant results from the search engine. Don't include the beginning 'Search Query: '",
+                        }
+                    ],
+                }
+            ],
+            max_tokens=20,
+        )
+        .choices[0]
+        .message.content
+    )
+
     tbl = db.open_table(COURT_CASE_OPINIONS_TABLE_NAME)
 
     # call court listener api to get the 25 most relevant court case opinions (according to them)
@@ -97,18 +145,25 @@ def get_most_relevant_court_case_opinions(
     order_by = "score desc"
     stat_Precedential = "on"
     highlight = "on"
-    url = f"https://www.courtlistener.com/api/rest/v4/search/?q={query}&type={type}&order_by={order_by}&stat_Precedential={stat_Precedential}&highlight={highlight}"
+    print(basicized_query)
+    url = f"https://www.courtlistener.com/api/rest/v4/search/?q={basicized_query}&type={type}&order_by={order_by}&stat_Precedential={stat_Precedential}&highlight={highlight}"
+    # print(url)
     headers = {"Authorization": f"Token {cl_api_key}"}
 
     cases_fetched = 0
+    cases_to_fetch = IDEAL_CASES_TO_FETCH
 
-    while url and cases_fetched < CASES_TO_FETCH:
+    while url and cases_fetched < cases_to_fetch:
         response = requests.get(url, headers=headers)
         data = response.json()
-        cases_fetched += len(data["results"])
+        # print(data)
 
-        if data["count"] == 0:
+        if data["count"] == 0 or not data.get("results"):
             return []
+
+        cases_to_fetch = min(IDEAL_CASES_TO_FETCH - cases_fetched, data["count"])
+
+        cases_fetched += len(data["results"])
 
         # print("cases fetched: ", cases_fetched)
         # print("rows: ", tbl.count_rows())
@@ -116,6 +171,7 @@ def get_most_relevant_court_case_opinions(
         # print(type(data["results"][0]["opinions"][0]["download_url"]))
 
         # performs a "upsert" operation on the docket_id column, drop on bad vectors
+
         tbl.merge_insert(
             "docket_id",
         ).when_matched_update_all().when_not_matched_insert_all().execute(
@@ -136,7 +192,14 @@ def get_most_relevant_court_case_opinions(
                         (
                             opinion["download_url"] if opinion["download_url"] else "",
                             str(opinion["id"]),
-                            opinion["snippet"],
+                            # opinion["snippet"],
+                            generate_revelant_summary(
+                                opinion["download_url"],
+                                query,
+                                opinion["snippet"],
+                            )
+                            if opinion["download_url"]
+                            else "",
                             opinion["type"],
                         )
                         for opinion in result["opinions"]
@@ -151,8 +214,34 @@ def get_most_relevant_court_case_opinions(
         # Update the URL to the next page
         url = data["next"]
 
+    # similarized_opinion = (
+    #     openai_client.beta.chat.completions.parse(
+    #         model=CHATGPT_MODEL,
+    #         messages=[
+    #             {
+    #                 "role": "system",
+    #                 "content": f"Produce JSON! Extract a single embedding input, following these examples: {example_embedding_inputs}. The opinion tuple should contain the download url, stringified id, snippet, and type of the opinion.",
+    #             },
+    #             {
+    #                 "role": "user",
+    #                 "content": f"As a legal researcher, I am looking for court case opinions that are relevant to the query: {query}.",
+    #             },
+    #         ],
+    #         max_tokens=100,
+    #         response_format={"type": "json_object"},
+    #         # response_format=EmbeddingColumns,
+    #     )
+    #     .choices[0]
+    #     .message.parsed
+    # )
+    # print(similarized_opinion)
+    # if similarized_opinion is None:
+    #     similarized_opinion = basicized_query
+
     results = (
-        tbl.search(query, vector_column_name).limit(CASES_TO_DISPLAY).to_list()
+        tbl.search(basicized_query, vector_column_name)
+        .limit(CASES_TO_DISPLAY)
+        .to_list()
         # .to_pydantic(Embedding)
     )
     for result in results:
@@ -172,23 +261,3 @@ def get_most_relevant_court_case_opinions(
         ]
         result["opinions"] = new_opinions
     return results
-
-
-@app.post("/summarize-opinion")
-def generate_revelant_summary(opinion_download_url: str, query: str):
-    response = openai_client.chat.completions.create(
-        model=CHATGPT_MODEL,
-        messages=[
-            {
-                "role": "system",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f'Understand this following court case opinion: {opinion_download_url}. Then generate a title for this opinion that is relevant to the query: {query}. Don\'t include the beginning "Title: "',
-                    }
-                ],
-            }
-        ],
-        max_tokens=30,
-    )
-    return response.choices[0].message.content
